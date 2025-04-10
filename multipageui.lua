@@ -1,3 +1,11 @@
+-- MultiPageUI.lua (sur GitHub)
+
+print("Début du script MultiPageUI")
+print("game:", game)
+print("game:GetService:", game:GetService)
+print("UserInputService:", game:GetService("UserInputService"))
+print("LocalPlayer:", game.Players.LocalPlayer)
+
 local player = game.Players.LocalPlayer
 local players = game:GetService("Players")
 local userInputService = game:GetService("UserInputService")
