@@ -1,8 +1,11 @@
--- MultiPageUI.lua (sur GitHub)
+-- MultiPageUI.lua (avec délai)
+
+-- Attendre un court instant pour s'assurer que tous les services sont initialisés
+wait(1)
 
 print("Début du script MultiPageUI")
 print("game:", game)
-print("game:GetService:", game:GetService)
+print("game:GetService:", game.GetService)
 print("UserInputService:", game:GetService("UserInputService"))
 print("LocalPlayer:", game.Players.LocalPlayer)
 
