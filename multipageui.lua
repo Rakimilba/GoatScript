@@ -1,13 +1,4 @@
--- MultiPageUI.lua (avec délai)
-
--- Attendre un court instant pour s'assurer que tous les services sont initialisés
-wait(1)
-
-print("Début du script MultiPageUI")
-print("game:", game)
-print("game:GetService:", game.GetService)
-print("UserInputService:", game:GetService("UserInputService"))
-print("LocalPlayer:", game.Players.LocalPlayer)
+-- MultiPageUI.lua (sans débogage, ouverture/fermeture avec la touche K uniquement)
 
 local player = game.Players.LocalPlayer
 local players = game:GetService("Players")
@@ -411,33 +402,17 @@ frame.InputEnded:Connect(function(input)
     end
 end)
 
--- Gérer l'ouverture/fermeture avec Ctrl + K
-local isCtrlPressed = false
-
+-- Gérer l'ouverture/fermeture avec la touche K uniquement
 userInputService.InputBegan:Connect(function(input, gameProcessedEvent)
     if gameProcessedEvent then return end -- Ignorer si l'input est utilisé par le jeu (ex : chat)
 
-    -- Détecter si Ctrl est pressé
-    if input.KeyCode == Enum.KeyCode.LeftControl or input.KeyCode == Enum.KeyCode.RightControl then
-        isCtrlPressed = true
-    end
-
-    -- Détecter Ctrl + K
-    if isCtrlPressed and input.KeyCode == Enum.KeyCode.K then
+    -- Détecter la touche K
+    if input.KeyCode == Enum.KeyCode.K then
         screenGui.Enabled = not screenGui.Enabled
         if screenGui.Enabled then
             print("UI ouverte")
         else
             print("UI fermée")
         end
-    end
-end)
-
-userInputService.InputEnded:Connect(function(input, gameProcessedEvent)
-    if gameProcessedEvent then return end
-
-    -- Détecter si Ctrl est relâché
-    if input.KeyCode == Enum.KeyCode.LeftControl or input.KeyCode == Enum.KeyCode.RightControl then
-        isCtrlPressed = false
     end
 end)
