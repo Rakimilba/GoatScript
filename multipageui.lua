@@ -1,5 +1,3 @@
--- MultiPageUI.lua (sur GitHub)
-
 local player = game.Players.LocalPlayer
 local players = game:GetService("Players")
 local userInputService = game:GetService("UserInputService")
@@ -70,7 +68,7 @@ modifyTabButton.Position = UDim2.new(0.5, 0, 0, 0)
 modifyTabButton.Text = "Modifications"
 modifyTabButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 modifyTabButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-teleportTabButton.BackgroundTransparency = 0.5 -- Semi-transparent
+modifyTabButton.BackgroundTransparency = 0.5 -- Semi-transparent
 modifyTabButton.TextScaled = true
 modifyTabButton.Parent = tabFrame
 
@@ -262,7 +260,7 @@ local function createModifyPage()
             end
         else
             warn("Veuillez entrer un nombre valide pour la vitesse.")
-        end)
+        end
     end)
 
     -- Label et champ pour la hauteur de saut
@@ -328,7 +326,7 @@ local function createModifyPage()
             end
         else
             warn("Veuillez entrer un nombre valide pour la hauteur de saut.")
-        end)
+        end
     end)
 
     -- Bouton pour activer/désactiver le God Mode
@@ -373,7 +371,7 @@ local function createModifyPage()
             end
         else
             warn("Personnage non chargé.")
-        end)
+        end
     end)
 end
 
