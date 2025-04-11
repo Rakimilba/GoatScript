@@ -1,4 +1,4 @@
--- MultiPageUI.lua (avec correction de la liste déroulante et Ctrl + Click TP)
+-- MultiPageUI.lua (avec correction de l'affichage de la liste déroulante au premier plan)
 
 local player = game.Players.LocalPlayer
 local players = game:GetService("Players")
@@ -24,6 +24,7 @@ frame.Position = UDim2.new(1, -310, 0, 10)
 frame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 frame.BackgroundTransparency = 0.5 -- Fond semi-transparent
 frame.BorderSizePixel = 0
+frame.ZIndex = 1 -- ZIndex de base pour le frame principal
 frame.Parent = screenGui
 
 -- Ajouter un coin arrondi
@@ -41,6 +42,7 @@ title.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 title.BackgroundTransparency = 0.5 -- Semi-transparent
 title.TextScaled = true
 title.TextXAlignment = Enum.TextXAlignment.Center
+title.ZIndex = 2 -- ZIndex supérieur pour être au-dessus du frame
 title.Parent = frame
 
 -- Frame pour les onglets
@@ -50,6 +52,7 @@ tabFrame.Position = UDim2.new(0, 0, 0, 40)
 tabFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 tabFrame.BackgroundTransparency = 0.5 -- Semi-transparent
 tabFrame.BorderSizePixel = 0
+tabFrame.ZIndex = 2 -- ZIndex supérieur pour être au-dessus du frame
 tabFrame.Parent = frame
 
 -- Bouton onglet "Téléportation"
@@ -61,6 +64,7 @@ teleportTabButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 teleportTabButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
 teleportTabButton.BackgroundTransparency = 0.5 -- Semi-transparent
 teleportTabButton.TextScaled = true
+teleportTabButton.ZIndex = 3 -- ZIndex supérieur pour être au-dessus du tabFrame
 teleportTabButton.Parent = tabFrame
 
 -- Bouton onglet "Modifications"
@@ -72,6 +76,7 @@ modifyTabButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 modifyTabButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 modifyTabButton.BackgroundTransparency = 0.5 -- Semi-transparent
 modifyTabButton.TextScaled = true
+modifyTabButton.ZIndex = 3 -- ZIndex supérieur pour être au-dessus du tabFrame
 modifyTabButton.Parent = tabFrame
 
 -- Page Téléportation
@@ -79,6 +84,7 @@ local teleportPage = Instance.new("Frame")
 teleportPage.Size = UDim2.new(1, 0, 1, -80)
 teleportPage.Position = UDim2.new(0, 0, 0, 80)
 teleportPage.BackgroundTransparency = 1
+teleportPage.ZIndex = 2 -- ZIndex pour la page
 teleportPage.Parent = frame
 
 -- Page Modifications
@@ -87,6 +93,7 @@ modifyPage.Size = UDim2.new(1, 0, 1, -80)
 modifyPage.Position = UDim2.new(0, 0, 0, 80)
 modifyPage.BackgroundTransparency = 1
 modifyPage.Visible = false
+modifyPage.ZIndex = 2 -- ZIndex pour la page
 modifyPage.Parent = frame
 
 -- Fonction pour basculer entre les pages
@@ -148,6 +155,7 @@ local function createTeleportPage()
     playerLabel.BackgroundTransparency = 1
     playerLabel.TextScaled = true
     playerLabel.TextXAlignment = Enum.TextXAlignment.Left
+    playerLabel.ZIndex = 3 -- ZIndex pour être au-dessus de la page
     playerLabel.Parent = teleportPage
 
     -- Frame pour la liste déroulante
@@ -156,6 +164,7 @@ local function createTeleportPage()
     dropdownFrame.Position = UDim2.new(0, 10, 0, 40)
     dropdownFrame.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
     dropdownFrame.BackgroundTransparency = 0.5
+    dropdownFrame.ZIndex = 4 -- ZIndex élevé pour être au-dessus des autres éléments
     dropdownFrame.Parent = teleportPage
 
     local dropdownCorner = Instance.new("UICorner")
@@ -169,6 +178,7 @@ local function createTeleportPage()
     dropdownButton.TextColor3 = Color3.fromRGB(255, 255, 255)
     dropdownButton.BackgroundTransparency = 1
     dropdownButton.TextScaled = true
+    dropdownButton.ZIndex = 5 -- ZIndex pour être au-dessus du dropdownFrame
     dropdownButton.Parent = dropdownFrame
 
     -- ScrollingFrame pour la liste déroulante
@@ -180,11 +190,17 @@ local function createTeleportPage()
     dropdownList.CanvasSize = UDim2.new(0, 0, 0, 0)
     dropdownList.ScrollBarThickness = 5
     dropdownList.Visible = false
+    dropdownList.ZIndex = 6 -- ZIndex très élevé pour être au premier plan
     dropdownList.Parent = dropdownFrame
 
     local listCorner = Instance.new("UICorner")
     listCorner.CornerRadius = UDim.new(0, 5)
     listCorner.Parent = dropdownList
+
+    -- Ajouter un UIListLayout pour organiser les éléments de la liste
+    local listLayout = Instance.new("UIListLayout")
+    listLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    listLayout.Parent = dropdownList
 
     -- Bouton pour se téléporter au joueur sélectionné
     local teleportToPlayerButton = Instance.new("TextButton")
@@ -195,6 +211,7 @@ local function createTeleportPage()
     teleportToPlayerButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
     teleportToPlayerButton.BackgroundTransparency = 0.5
     teleportToPlayerButton.TextScaled = true
+    teleportToPlayerButton.ZIndex = 3 -- ZIndex inférieur à la liste déroulante
     teleportToPlayerButton.Parent = teleportPage
 
     local teleportButtonCorner = Instance.new("UICorner")
@@ -211,31 +228,26 @@ local function createTeleportPage()
     -- Fonction pour mettre à jour la liste déroulante
     local selectedPlayer = nil
     local function updateDropdown()
-        -- Nettoyer complètement la liste
+        -- Nettoyer complètement la liste (sauf le UIListLayout)
         for _, child in pairs(dropdownList:GetChildren()) do
-            if child:IsA("TextButton") or child:IsA("UIListLayout") then
+            if child:IsA("TextButton") then
                 child:Destroy()
             end
         end
-
-        -- Ajouter un UIListLayout pour organiser les éléments
-        local listLayout = Instance.new("UIListLayout")
-        listLayout.SortOrder = Enum.SortOrder.LayoutOrder
-        listLayout.Parent = dropdownList
 
         -- Ajouter les joueurs à la liste
         local playerList = players:GetPlayers()
         local yOffset = 0
         for _, target in pairs(playerList) do
-            if target ~= player then -- Exclure le joueur local
+            if target ~= player and target:IsA("Player") then -- Vérifier que c'est un joueur valide et exclure le joueur local
                 local playerButton = Instance.new("TextButton")
                 playerButton.Size = UDim2.new(1, 0, 0, 30)
-                playerButton.Position = UDim2.new(0, 0, 0, yOffset)
                 playerButton.Text = target.Name
                 playerButton.TextColor3 = Color3.fromRGB(255, 255, 255)
                 playerButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
                 playerButton.BackgroundTransparency = 0.5
                 playerButton.TextScaled = true
+                playerButton.ZIndex = 7 -- ZIndex pour être au-dessus du dropdownList
                 playerButton.Parent = dropdownList
 
                 playerButton.MouseButton1Click:Connect(function()
@@ -257,6 +269,7 @@ local function createTeleportPage()
 
     -- Afficher/masquer la liste déroulante
     dropdownButton.MouseButton1Click:Connect(function()
+        updateDropdown() -- Mettre à jour la liste à chaque ouverture pour éviter les données obsolètes
         dropdownList.Visible = not dropdownList.Visible
     end)
 
@@ -278,6 +291,7 @@ local function createTeleportPage()
     coordsLabel.BackgroundTransparency = 1
     coordsLabel.TextScaled = true
     coordsLabel.TextXAlignment = Enum.TextXAlignment.Left
+    coordsLabel.ZIndex = 3 -- ZIndex inférieur à la liste déroulante
     coordsLabel.Parent = teleportPage
 
     -- Champs pour les coordonnées X, Y, Z
@@ -289,6 +303,7 @@ local function createTeleportPage()
     xBox.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
     xBox.BackgroundTransparency = 0.5
     xBox.TextScaled = true
+    xBox.ZIndex = 3 -- ZIndex inférieur à la liste déroulante
     xBox.Parent = teleportPage
 
     local xBoxCorner = Instance.new("UICorner")
@@ -303,6 +318,7 @@ local function createTeleportPage()
     yBox.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
     yBox.BackgroundTransparency = 0.5
     yBox.TextScaled = true
+    yBox.ZIndex = 3 -- ZIndex inférieur à la liste déroulante
     yBox.Parent = teleportPage
 
     local yBoxCorner = Instance.new("UICorner")
@@ -317,6 +333,7 @@ local function createTeleportPage()
     zBox.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
     zBox.BackgroundTransparency = 0.5
     zBox.TextScaled = true
+    zBox.ZIndex = 3 -- ZIndex inférieur à la liste déroulante
     zBox.Parent = teleportPage
 
     local zBoxCorner = Instance.new("UICorner")
@@ -332,6 +349,7 @@ local function createTeleportPage()
     teleportToCoordsButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
     teleportToCoordsButton.BackgroundTransparency = 0.5
     teleportToCoordsButton.TextScaled = true
+    teleportToCoordsButton.ZIndex = 3 -- ZIndex inférieur à la liste déroulante
     teleportToCoordsButton.Parent = teleportPage
 
     local coordsButtonCorner = Instance.new("UICorner")
@@ -366,6 +384,7 @@ local function createTeleportPage()
     ctrlClickTPButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
     ctrlClickTPButton.BackgroundTransparency = 0.5
     ctrlClickTPButton.TextScaled = true
+    ctrlClickTPButton.ZIndex = 3 -- ZIndex inférieur à la liste déroulante
     ctrlClickTPButton.Parent = teleportPage
 
     local clickTPButtonCorner = Instance.new("UICorner")
@@ -435,6 +454,7 @@ local function createModifyPage()
     speedLabel.BackgroundTransparency = 1
     speedLabel.TextScaled = true
     speedLabel.TextXAlignment = Enum.TextXAlignment.Left
+    speedLabel.ZIndex = 3 -- ZIndex pour la page Modifications
     speedLabel.Parent = modifyPage
 
     local speedBox = Instance.new("TextBox")
@@ -445,6 +465,7 @@ local function createModifyPage()
     speedBox.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
     speedBox.BackgroundTransparency = 0.5 -- Semi-transparent
     speedBox.TextScaled = true
+    speedBox.ZIndex = 3
     speedBox.Parent = modifyPage
 
     local speedBoxCorner = Instance.new("UICorner")
@@ -457,8 +478,9 @@ local function createModifyPage()
     speedButton.Text = "Appliquer"
     speedButton.TextColor3 = Color3.fromRGB(255, 255, 255)
     speedButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-    speedBox.BackgroundTransparency = 0.5 -- Semi-transparent
+    speedButton.BackgroundTransparency = 0.5 -- Semi-transparent
     speedButton.TextScaled = true
+    speedButton.ZIndex = 3
     speedButton.Parent = modifyPage
 
     local speedButtonCorner = Instance.new("UICorner")
@@ -496,6 +518,7 @@ local function createModifyPage()
     jumpLabel.BackgroundTransparency = 1
     jumpLabel.TextScaled = true
     jumpLabel.TextXAlignment = Enum.TextXAlignment.Left
+    jumpLabel.ZIndex = 3
     jumpLabel.Parent = modifyPage
 
     local jumpBox = Instance.new("TextBox")
@@ -506,6 +529,7 @@ local function createModifyPage()
     jumpBox.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
     jumpBox.BackgroundTransparency = 0.5 -- Semi-transparent
     jumpBox.TextScaled = true
+    jumpBox.ZIndex = 3
     jumpBox.Parent = modifyPage
 
     local jumpBoxCorner = Instance.new("UICorner")
@@ -520,6 +544,7 @@ local function createModifyPage()
     jumpButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
     jumpButton.BackgroundTransparency = 0.5 -- Semi-transparent
     jumpButton.TextScaled = true
+    jumpButton.ZIndex = 3
     jumpButton.Parent = modifyPage
 
     local jumpButtonCorner = Instance.new("UICorner")
@@ -563,6 +588,7 @@ local function createModifyPage()
     godModeButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
     godModeButton.BackgroundTransparency = 0.5 -- Semi-transparent
     godModeButton.TextScaled = true
+    godModeButton.ZIndex = 3
     godModeButton.Parent = modifyPage
 
     local godModeButtonCorner = Instance.new("UICorner")
