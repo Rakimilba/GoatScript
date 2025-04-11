@@ -1,4 +1,4 @@
--- MultiPageUI.lua (avec modifications sur la page Téléportation)
+-- MultiPageUI.lua (avec correction de la liste déroulante et Ctrl + Click TP)
 
 local player = game.Players.LocalPlayer
 local players = game:GetService("Players")
@@ -137,7 +137,7 @@ local function teleportToCoordinates(x, y, z)
     print("Téléporté aux coordonnées : " .. x .. ", " .. y .. ", " .. z)
 end
 
--- Créer la page Téléportation avec une liste déroulante, des champs de coordonnées et un bouton Click TP
+-- Créer la page Téléportation avec une liste déroulante, des champs de coordonnées et un bouton Ctrl + Click TP
 local function createTeleportPage()
     -- Label pour la liste déroulante
     local playerLabel = Instance.new("TextLabel")
@@ -211,15 +211,23 @@ local function createTeleportPage()
     -- Fonction pour mettre à jour la liste déroulante
     local selectedPlayer = nil
     local function updateDropdown()
+        -- Nettoyer complètement la liste
         for _, child in pairs(dropdownList:GetChildren()) do
-            if child:IsA("TextButton") then
+            if child:IsA("TextButton") or child:IsA("UIListLayout") then
                 child:Destroy()
             end
         end
 
+        -- Ajouter un UIListLayout pour organiser les éléments
+        local listLayout = Instance.new("UIListLayout")
+        listLayout.SortOrder = Enum.SortOrder.LayoutOrder
+        listLayout.Parent = dropdownList
+
+        -- Ajouter les joueurs à la liste
+        local playerList = players:GetPlayers()
         local yOffset = 0
-        for _, target in pairs(players:GetPlayers()) do
-            if target ~= player then
+        for _, target in pairs(playerList) do
+            if target ~= player then -- Exclure le joueur local
                 local playerButton = Instance.new("TextButton")
                 playerButton.Size = UDim2.new(1, 0, 0, 30)
                 playerButton.Position = UDim2.new(0, 0, 0, yOffset)
@@ -348,46 +356,65 @@ local function createTeleportPage()
         end
     end)
 
-    -- Bouton pour activer/désactiver le Click TP
-    local clickTPEnabled = false
-    local clickTPButton = Instance.new("TextButton")
-    clickTPButton.Size = UDim2.new(0, 150, 0, 30)
-    clickTPButton.Position = UDim2.new(0, 10, 0, 200)
-    clickTPButton.Text = "Activer Click TP"
-    clickTPButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    clickTPButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-    clickTPButton.BackgroundTransparency = 0.5
-    clickTPButton.TextScaled = true
-    clickTPButton.Parent = teleportPage
+    -- Bouton pour activer/désactiver le Ctrl + Click TP
+    local ctrlClickTPEnabled = false
+    local ctrlClickTPButton = Instance.new("TextButton")
+    ctrlClickTPButton.Size = UDim2.new(0, 150, 0, 30)
+    ctrlClickTPButton.Position = UDim2.new(0, 10, 0, 200)
+    ctrlClickTPButton.Text = "Activer Ctrl + Click TP"
+    ctrlClickTPButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    ctrlClickTPButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    ctrlClickTPButton.BackgroundTransparency = 0.5
+    ctrlClickTPButton.TextScaled = true
+    ctrlClickTPButton.Parent = teleportPage
 
     local clickTPButtonCorner = Instance.new("UICorner")
     clickTPButtonCorner.CornerRadius = UDim.new(0, 5)
-    clickTPButtonCorner.Parent = clickTPButton
+    clickTPButtonCorner.Parent = ctrlClickTPButton
 
-    clickTPButton.MouseEnter:Connect(function()
-        clickTPButton.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+    ctrlClickTPButton.MouseEnter:Connect(function()
+        ctrlClickTPButton.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
     end)
-    clickTPButton.MouseLeave:Connect(function()
-        clickTPButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    ctrlClickTPButton.MouseLeave:Connect(function()
+        ctrlClickTPButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
     end)
 
-    -- Gestion du Click TP
+    -- Gestion du Ctrl + Click TP
     local mouse = player:GetMouse()
-    clickTPButton.MouseButton1Click:Connect(function()
-        clickTPEnabled = not clickTPEnabled
-        if clickTPEnabled then
-            clickTPButton.Text = "Désactiver Click TP"
-            clickTPButton.BackgroundColor3 = Color3.fromRGB(0, 120, 0)
-            print("Click TP activé")
-        else
-            clickTPButton.Text = "Activer Click TP"
-            clickTPButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-            print("Click TP désactivé")
+    local isCtrlPressed = false
+
+    -- Détecter si Ctrl est pressé
+    userInputService.InputBegan:Connect(function(input, gameProcessedEvent)
+        if gameProcessedEvent then return end
+        if input.KeyCode == Enum.KeyCode.LeftControl or input.KeyCode == Enum.KeyCode.RightControl then
+            isCtrlPressed = true
         end
     end)
 
+    userInputService.InputEnded:Connect(function(input, gameProcessedEvent)
+        if gameProcessedEvent then return end
+        if input.KeyCode == Enum.KeyCode.LeftControl or input.KeyCode == Enum.KeyCode.RightControl then
+            isCtrlPressed = false
+        end
+    end)
+
+    -- Activer/désactiver le Ctrl + Click TP
+    ctrlClickTPButton.MouseButton1Click:Connect(function()
+        ctrlClickTPEnabled = not ctrlClickTPEnabled
+        if ctrlClickTPEnabled then
+            ctrlClickTPButton.Text = "Désactiver Ctrl + Click TP"
+            ctrlClickTPButton.BackgroundColor3 = Color3.fromRGB(0, 120, 0)
+            print("Ctrl + Click TP activé")
+        else
+            ctrlClickTPButton.Text = "Activer Ctrl + Click TP"
+            ctrlClickTPButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+            print("Ctrl + Click TP désactivé")
+        end
+    end)
+
+    -- Téléportation avec Ctrl + Clic
     mouse.Button1Down:Connect(function()
-        if clickTPEnabled then
+        if ctrlClickTPEnabled and isCtrlPressed then
             local targetPosition = mouse.Hit.Position
             teleportToCoordinates(targetPosition.X, targetPosition.Y + 5, targetPosition.Z) -- +5 pour éviter de se téléporter dans le sol
         end
