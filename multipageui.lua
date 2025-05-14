@@ -1,5 +1,5 @@
 -- MultiPageUI.lua (avec correction de l'affichage de la liste déroulante au premier plan)
-print('Hello World')
+
 local player = game.Players.LocalPlayer
 local players = game:GetService("Players")
 local userInputService = game:GetService("UserInputService")
@@ -443,6 +443,54 @@ end
 -- Initialiser la page Téléportation
 createTeleportPage()
 
+
+local function createSpecialTab()
+    local specialTabButton = Instance.new("TextButton")
+    specialTabButton.Size = UDim2.new(1, 0, 0, 40)
+    specialTabButton.Position = UDim2.new(0, 0, 0, 120)
+    specialTabButton.Text = "Jeu Spécial"
+    specialTabButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    specialTabButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+    specialTabButton.BackgroundTransparency = 0.5
+    specialTabButton.TextScaled = true
+    specialTabButton.ZIndex = 3
+    specialTabButton.Parent = tabFrame
+
+    local specialPage = Instance.new("Frame")
+    specialPage.Size = UDim2.new(1, 0, 1, -80)
+    specialPage.Position = UDim2.new(0, 0, 0, 80)
+    specialPage.BackgroundTransparency = 1
+    specialPage.Visible = false
+    specialPage.ZIndex = 2
+    specialPage.Parent = frame
+
+    local infoLabel = Instance.new("TextLabel")
+    infoLabel.Size = UDim2.new(1, -20, 0, 100)
+    infoLabel.Position = UDim2.new(0, 10, 0, 10)
+    infoLabel.Text = "Bienvenue dans le jeu spécial !"
+    infoLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    infoLabel.BackgroundTransparency = 1
+    infoLabel.TextScaled = true
+    infoLabel.TextXAlignment = Enum.TextXAlignment.Center
+    infoLabel.TextYAlignment = Enum.TextYAlignment.Top
+    infoLabel.ZIndex = 3
+    infoLabel.Parent = specialPage
+
+    specialTabButton.MouseButton1Click:Connect(function()
+        teleportPage.Visible = false
+        modifyPage.Visible = false
+        specialPage.Visible = true
+
+        teleportTabButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+        modifyTabButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+        specialTabButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+    end)
+end
+
+-- Détecter le jeu et ajouter l'onglet si l'ID correspond
+if game.GameId == 87039211657390 then
+    createSpecialTab()
+end
 -- Éléments de la page Modifications
 local function createModifyPage()
     -- Label et champ pour la vitesse
