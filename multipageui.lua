@@ -1,5 +1,5 @@
 -- MultiPageUI.lua (avec correction de l'affichage de la liste déroulante au premier plan)
-
+print('Hello World')
 local player = game.Players.LocalPlayer
 local players = game:GetService("Players")
 local userInputService = game:GetService("UserInputService")
